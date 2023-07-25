@@ -213,7 +213,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.plot(num_func_eval, tuning_result_std, label=label_name, linewidth=2.5, color=color_code)
         
                 if objective == "median" or objective == "mean":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
 
                     if problem_id == 0:
                         ax.legend(loc='upper right')
@@ -231,7 +231,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     ax.yaxis.grid()
         
                 elif objective == "std":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
         
                     ax.set_xlim(1, 50)
                     ax.set_xticks([1,10,20,30,40,50])
@@ -405,7 +405,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.plot(num_func_eval, tuning_result_std, label=label_name, linewidth=2.5, color=color_code)
     
                 if objective == "median" or objective == "mean":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
     
                     if mattype == "GA" or mattype =="T5":
                         #ax.set_xlim(0, 400) #1000)
@@ -431,14 +431,14 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     #ax.set_xlim(0, 450)
                     ax.set_ylim(0.5, 2.0)
     
-                    ax.set_xlabel("Function evaluation time (s)", fontsize=12)
+                    ax.set_xlabel("Accumulated function evaluation time (s)", fontsize=12)
                     if problem_id == 0:
                         ax.set_ylabel("Tuned performance \n (wall-clock time (s))", fontsize=12)
     
                     ax.yaxis.grid()
     
                 elif objective == "std":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
     
                     if mattype == "GA" or mattype =="T5":
                         ax.set_xlim(0, 1000)
@@ -454,7 +454,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.set_xticklabels(["0","500","1000","1500","2000"])
                     #ax.set_xlim(3, 50)
     
-                    ax.set_xlabel("Function evaluation time (s)", fontsize=12)
+                    ax.set_xlabel("Accumulated function evaluation time (s)", fontsize=12)
                     if problem_id == 0:
                         ax.set_ylabel("Standard deviation of \n tuned performance", fontsize=12)
     

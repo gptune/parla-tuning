@@ -207,7 +207,7 @@ def gen_plot():
                     }
 
             if (category_id >= 0 and category_id <= 2):
-                ax.set_title(name_map_rls_method[rls_method]) #+ " ("+name_map_sketch_operator[sketch_operator]+")")
+                ax.set_title("$\mathsf{"+name_map_rls_method[rls_method]+"}$", fontsize=10) #+ " ("+name_map_sketch_operator[sketch_operator]+")")
             ax.set_ylim([0,20])
             ax.set_xlim([0,11])
             ax.yaxis.set_tick_params(labelsize=8)
@@ -238,19 +238,19 @@ def gen_plot():
         fig.suptitle(fig_title, fontsize=15)
 
         fig.text(0.12, 0.92,
-                "Matrix: GA",
+                "Matrix: $\mathsf{GA}$",
                 fontsize = 15)
 
         fig.text(0.36, 0.92,
-                "Matrix: T5",
+                "Matrix: $\mathsf{T5}$",
                 fontsize = 15)
 
         fig.text(0.60, 0.92,
-                "Matrix: T3",
+                "Matrix: $\mathsf{T3}$",
                 fontsize = 15)
 
         fig.text(0.83, 0.92,
-                "Matrix: T1",
+                "Matrix: $\mathsf{T1}$",
                 fontsize = 15)
 
         fig.subplots_adjust(top=0.88, bottom=0.22, left=0.045, right=0.98, wspace=0.05, hspace=0.06)

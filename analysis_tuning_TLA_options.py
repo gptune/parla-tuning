@@ -11,6 +11,68 @@ import matplotlib.gridspec as gridspec
 import os
 import math
 
+def query_best_result(n_rows, n_cols, failure_handling, mattype):
+    tolerance = 1e-6
+    dbfile = "GRID-SEARCH-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+"-tolerance_"+str(tolerance)+".json"
+    with open("grid_search/grid_search.db/"+dbfile, "r") as f_in:
+        function_evaluations = json.load(f_in)
+        for func_eval in function_evaluations:
+            if func_eval["tuning_parameter"]["rls_method"] == "blendenpik" and \
+               func_eval["tuning_parameter"]["sketch_operator"] == "sjlt" and \
+               func_eval["tuning_parameter"]["sampling_factor"] == 5.0 and \
+               func_eval["tuning_parameter"]["vec_nnz"] == 50:
+                reference_normalized_residual_error_to_Axstar = func_eval["evaluation_result"]["normalized_residual_error_to_Axstar"]
+
+    num_evals = 0
+    total_evaluation_time = 0
+
+    best_wall_clock_time = -1
+    for tolerance in [1e-6, 1e-8, 1e-10]:
+        if tolerance == 1e-6:
+            tolerance_level = 0
+        elif tolerance == 1e-8:
+            tolerance_level = 1
+        elif tolerance == 1e-10:
+            tolerance_level = 2
+
+        dbfile = "GRID-SEARCH-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+"-tolerance_"+str(tolerance)+".json"
+        with open("grid_search/grid_search.db/"+dbfile, "r") as f_in:
+            function_evaluations = json.load(f_in)
+
+        for func_eval in function_evaluations:
+            rls_method = func_eval["tuning_parameter"]["rls_method"]
+            sketch_operator = func_eval["tuning_parameter"]["sketch_operator"]
+            sampling_factor = func_eval["tuning_parameter"]["sampling_factor"]
+            vec_nnz = func_eval["tuning_parameter"]["vec_nnz"]
+            normalized_residual_error_to_Axstar = func_eval["evaluation_result"]["normalized_residual_error_to_Axstar"]
+            wall_clock_time = func_eval["evaluation_result"]["wall_clock_time"]
+
+            total_evaluation_time += np.sum(func_eval["evaluation_detail"]["wall_clock_time"]["evaluations"])
+
+            if rls_method == "blendenpik" and sketch_operator == "sjlt":
+                category = 0
+            elif rls_method == "lsrn" and sketch_operator == "sjlt":
+                category = 1
+            elif rls_method == "newtonsketch" and sketch_operator == "sjlt":
+                category = 2
+            elif rls_method == "blendenpik" and sketch_operator == "less_uniform":
+                category = 3
+            elif rls_method == "lsrn" and sketch_operator == "less_uniform":
+                category = 4
+            elif rls_method == "newtonsketch" and sketch_operator == "less_uniform":
+                category = 5
+
+            sampling_factor_map = {1:0, 2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:8, 10:9}
+            vec_nnz_map = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 10: 9, 20: 10, 30: 11, 40: 12, 50: 13, 60: 14, 70: 15, 80: 16, 90: 17, 100: 18}
+            if normalized_residual_error_to_Axstar <= 10*(reference_normalized_residual_error_to_Axstar):
+                if best_wall_clock_time == -1 or wall_clock_time < best_wall_clock_time:
+                    best_wall_clock_time = wall_clock_time
+
+            num_evals += 1
+
+    return best_wall_clock_time, num_evals, total_evaluation_time
+
+
 def gen_plots(n_rows, n_cols, failure_handling):
 
     experiment_name = "analysis_tuning_TLA_options"
@@ -36,6 +98,9 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     mattype = "T3"
                 elif problem_id == 3:
                     mattype = "T1"
+
+                best_result_by_grid_search, num_total_grid_evaluations, num_total_grid_evaluation_time = query_best_result(n_rows, n_cols, failure_handling, mattype)
+                ax.axhline(best_result_by_grid_search, color="black", linestyle="-", label="Peak perf.")
         
                 #for tuner in ["lhsmdu","tpe","gptune","gptune-tla","gptune-tla1","gptune-tla2","gptune-tla3","gptune-tla4"]: #,"gptune-tla5"]:
                 #for tuner in ["lhsmdu","tpe","gptune","gptune-tla","gptune-tla3"]:
@@ -172,21 +237,22 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.plot(num_func_eval, tuning_result_std, label=label_name, linewidth=2.5, color=color_code)
         
                 if objective == "median" or objective == "mean":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
 
                     if problem_id == 0:
-                        ax.legend(loc='upper right', ncol=1)
+                        ax.legend(fontsize=9, loc='upper right', ncol=1)
 
                     ax.set_xlim(1, 50)
                     ax.set_xticks([1,10,20,30,40,50])
                     ax.set_xticklabels(["3","10","20","30","40","50"])
 
-                    if mattype == "T1":
-                        ax.set_ylim(0.8, 2.0)
-                        ax.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
-                        ax.set_yticklabels(["0.8","1.0","1.2","1.4","1.6","1.8","2.0"])
-                    else:
-                        ax.set_ylim(0.6, 1.4)
+                    ax.set_ylim(0.5, 2.0)
+                    #if mattype == "T1":
+                    #    ax.set_ylim(0.8, 2.0)
+                    #    ax.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
+                    #    ax.set_yticklabels(["0.8","1.0","1.2","1.4","1.6","1.8","2.0"])
+                    #else:
+                    #    ax.set_ylim(0.6, 1.4)
 
                     ax.set_xlabel("Number of function evaluations", fontsize=12)
                     if problem_id == 0:
@@ -195,7 +261,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     ax.yaxis.grid()
         
                 elif objective == "std":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
 
                     ax.set_xlim(1, 50)
                     ax.set_xticks([1,10,20,30,40,50])
@@ -225,6 +291,9 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     mattype = "T3"
                 elif problem_id == 3:
                     mattype = "T1"
+
+                best_result_by_grid_search, num_total_grid_evaluations, num_total_grid_evaluation_time = query_best_result(n_rows, n_cols, failure_handling, mattype)
+                ax.axhline(best_result_by_grid_search, color="black", linestyle="-", label="Peak perf.")
     
                 #for tuner in ["lhsmdu","tpe","gptune","gptune-tla","gptune-tla1","gptune-tla2","gptune-tla3","gptune-tla4"]: #,"gptune-tla5"]:
                 #for tuner in ["lhsmdu","tpe","gptune","gptune-tla","gptune-tla3"]:
@@ -389,8 +458,11 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.plot(num_func_eval, tuning_result_std, label=label_name, linewidth=2.5, color=color_code)
     
                 if objective == "median" or objective == "mean":
-                    ax.set_title("Matrix: "+mattype)
-    
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
+
+                    #if problem_id == 0:
+                    #    ax.legend(loc='upper right', ncol=1)
+
                     if mattype == "GA" or mattype =="T5":
                         ax.set_xlim(0, 600)
                         ax.set_xticks([0,200,400,600,800])
@@ -405,21 +477,22 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.set_xticklabels(["0","500","1000","1500"])
                     #ax.set_xlim(0, 450)
 
-                    if mattype == "T1":
-                        ax.set_ylim(0.8, 2.0)
-                        ax.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
-                        ax.set_yticklabels(["0.8","1.0","1.2","1.4","1.6","1.8","2.0"])
-                    else:
-                        ax.set_ylim(0.6, 1.4)
+                    ax.set_ylim(0.5, 2.0)
+                    #if mattype == "T1":
+                    #    ax.set_ylim(0.8, 2.0)
+                    #    ax.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
+                    #    ax.set_yticklabels(["0.8","1.0","1.2","1.4","1.6","1.8","2.0"])
+                    #else:
+                    #    ax.set_ylim(0.6, 1.4)
 
-                    ax.set_xlabel("Function evaluation time (s)", fontsize=12)
+                    ax.set_xlabel("Accumulated function evaluation time (s)", fontsize=12)
                     if problem_id == 0:
                         ax.set_ylabel("Tuned performance \n (wall-clock time (s))", fontsize=12)
     
                     ax.yaxis.grid()
     
                 elif objective == "std":
-                    ax.set_title("Matrix: "+mattype)
+                    ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
     
                     if mattype == "GA" or mattype =="T5":
                         ax.set_xlim(0, 1000)
@@ -435,7 +508,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.set_xticklabels(["0","500","1000","1500","2000"])
                     #ax.set_xlim(3, 50)
     
-                    ax.set_xlabel("Function evaluation time (s)", fontsize=12)
+                    ax.set_xlabel("Accumulated function evaluation time (s)", fontsize=12)
                     if problem_id == 0:
                         ax.set_ylabel("Standard deviation of \n tuned performance", fontsize=12)
     
