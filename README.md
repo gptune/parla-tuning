@@ -135,11 +135,17 @@ $ python sobol_analysis.py
 # Contributors
 
 Younghyun Cho, UC Berkeley
+
 Jim Demmel, UC Berkeley
+
 Michal Derezinski, The University of Michigan
+
 Haoyun Li, UC Berkeley
+
 Hengrui Luo, Lawrence Berkeley National Laboratory
+
 Michael Mahoney, UC Berkeley & Lawrence Berkeley National Laboratory & International Computer Science Institute
+
 Riley Murray, UC Berkeley & Lawrence Berkeley National Laboratory & International Computer Science Institute
 
 # Questions?
