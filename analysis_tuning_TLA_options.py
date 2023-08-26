@@ -77,6 +77,8 @@ def gen_plots(n_rows, n_cols, failure_handling):
 
     experiment_name = "analysis_tuning_TLA_options"
 
+    f_out2 = open("plots/analysis_tuning_TLA_options_accumulated_times.txt", "w")
+
     plt.rcParams["font.family"] = "Times New Roman"
     fig = plt.figure(figsize=(12,6))
     outer = gridspec.GridSpec(2, 1, wspace=0.1, hspace=0.8)
@@ -414,7 +416,21 @@ def gen_plots(n_rows, n_cols, failure_handling):
    
                     # plotting
                     if objective == "median" or objective == "mean":
-                        min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+
+                        print ("batches_best_tuning_result: ", batches_best_tuning_result)
+                        completion_times = []
+                        for i in range(len(batches_best_tuning_result)):
+                            print ("i : ", i , " length: ", len(batches_best_tuning_result[i]))
+                            completion_times.append(len(batches_best_tuning_result[i]))
+
+                        #min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        average_completion_time = int(np.round(np.average(completion_times))) #len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        f_out2.write(str(mattype)+","+str(label_name))
+                        f_out2.write(","+str(average_completion_time)+","+str(completion_times)+"\n")
+                        print ("average_completion_time: ", average_completion_time)
+
+                        min_bound = min(400, min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result))))
+                        #min_bound = 200
     
                         start_point = 0
                         for i in range(min_bound):
@@ -442,7 +458,9 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.fill_between(num_func_eval, best_tuning_result-np.std(batches_best_tuning_result_, axis=0), best_tuning_result+np.std(batches_best_tuning_result_, axis=0), color=color_code, alpha=0.2)
     
                     elif objective == "std":
-                        min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        #min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        min_bound = min(400, min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result))))
+                        #min_bound = 200
                         start_point = 0
                         for i in range(min_bound):
                             not_yet = False
@@ -464,17 +482,26 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     #    ax.legend(loc='upper right', ncol=1)
 
                     if mattype == "GA" or mattype =="T5":
-                        ax.set_xlim(0, 600)
-                        ax.set_xticks([0,200,400,600,800])
-                        ax.set_xticklabels(["0","200","400","600","800"])
+                        ax.set_xlim(0, 400) #1000)
+                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 600)
+                        #ax.set_xticks([0,200,400,600,800])
+                        #ax.set_xticklabels(["0","200","400","600","800"])
                     elif mattype == "T3":
-                        ax.set_xlim(0, 800)
-                        ax.set_xticks([0,200,400,600,800])
-                        ax.set_xticklabels(["0","200","400","600","800"])
+                        ax.set_xlim(0, 400) #1000)
+                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 800)
+                        #ax.set_xticks([0,200,400,600,800])
+                        #ax.set_xticklabels(["0","200","400","600","800"])
                     elif mattype == "T1":
-                        ax.set_xlim(0, 1500)
-                        ax.set_xticks([0,500,1000,1500])
-                        ax.set_xticklabels(["0","500","1000","1500"])
+                        ax.set_xlim(0, 400) #1000)
+                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 1500)
+                        #ax.set_xticks([0,500,1000,1500])
+                        #ax.set_xticklabels(["0","500","1000","1500"])
                     #ax.set_xlim(0, 450)
 
                     ax.set_ylim(0.5, 2.0)
@@ -519,18 +546,19 @@ def gen_plots(n_rows, n_cols, failure_handling):
     fig_title = "Tuning of the SAP algorithms (m: "+str(n_rows)+", n: "+str(n_cols)+")"
     fig.suptitle(fig_title, fontsize=15)
 
-    fig.text(0.25, 0.50,
-            "(a) Tuned performance depending on the number of function evaluations",
+    fig.text(0.15, 0.50,
+            "(a) Tuned performance depending on the number of function evaluations (until 50 function evaluations)",
             fontsize = 16,
             color = "black")
 
-    fig.text(0.23, 0.03,
-            "(b) Tuned performance depending on the accumulated function evaluation time",
+    fig.text(0.20, 0.03,
+            "(b) Tuned performance depending on the accumulated function evaluation time (until 400s)",
             fontsize = 16,
             color = "black")
 
     fig.subplots_adjust(top=0.88, bottom=0.15, left=0.06, right=0.98, wspace=0.02, hspace=0.02)
     fig.savefig("plots/"+experiment_name+".pdf")
+    f_out2.close()
 
 if __name__ == "__main__":
 

@@ -116,6 +116,7 @@ def query_ref_result(n_rows, n_cols, failure_handling, mattype):
 def gen_plots(n_rows, n_cols, failure_handling):
 
     f_out = open("plots/output.txt", "w")
+    f_out2 = open("plots/analysis_tuning_mean_accumulated_times.txt", "w")
 
     experiment_name = "analysis_tuning_mean"
 
@@ -288,63 +289,64 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         f_out.write(str(mattype)+","+str(tuner))
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.1:
-                                f_out.write(",1.1x-"+str(i+1))
+                                f_out.write(",1.1x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.1x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.2:
-                                f_out.write(",1.2x-"+str(i+1))
+                                f_out.write(",1.2x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.2x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.25:
-                                f_out.write(",1.25x-"+str(i+1))
+                                f_out.write(",1.25x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.25x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.3:
-                                f_out.write(",1.3x-"+str(i+1))
+                                f_out.write(",1.3x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.3x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.35:
-                                f_out.write(",1.35x-"+str(i+1))
+                                f_out.write(",1.35x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.35x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.36:
-                                f_out.write(",1.36x-"+str(i+1))
+                                f_out.write(",1.36x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.36x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.4:
-                                f_out.write(",1.4x-"+str(i+1))
+                                f_out.write(",1.4x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.4x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.5:
-                                f_out.write(",1.5x-"+str(i+1))
+                                f_out.write(",1.5x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.5x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= 0.7804318:
-                                f_out.write(",LHSMDU-"+str(i+1))
+                                f_out.write(",LHSMDUx-"+str(num_func_eval[i]))
+                                #f_out.write(",LHSMDU-"+str(i+1))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",LHSMDU-NA")
@@ -545,10 +547,23 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     # plotting
                     if objective == "median" or objective == "mean":
                         print ("batches_best_tuning_result: ", batches_best_tuning_result)
+                        completion_times = []
                         for i in range(len(batches_best_tuning_result)):
                             print ("i : ", i , " length: ", len(batches_best_tuning_result[i]))
+                            completion_times.append(len(batches_best_tuning_result[i]))
 
-                        min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        average_completion_time = int(np.round(np.average(completion_times))) #len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        f_out2.write(str(mattype)+","+str(tuner))
+                        f_out2.write(","+str(average_completion_time)+","+str(completion_times)+"\n")
+                        print ("average_completion_time: ", average_completion_time)
+
+                        label_name += " (avg_completion_time: "+str(average_completion_time) +"s)"
+
+                        #min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        if mattype == "T1":
+                            min_bound = 400
+                        else:
+                            min_bound = 400
     
                         start_point = 0
                         for i in range(min_bound):
@@ -577,56 +592,56 @@ def gen_plots(n_rows, n_cols, failure_handling):
 
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.1:
-                                f_out.write(",1.1x-"+str(i+1))
+                                f_out.write(",1.1x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.1x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.2:
-                                f_out.write(",1.2x-"+str(i+1))
+                                f_out.write(",1.2x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.2x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.25:
-                                f_out.write(",1.25x-"+str(i+1))
+                                f_out.write(",1.25x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.25x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.3:
-                                f_out.write(",1.3x-"+str(i+1))
+                                f_out.write(",1.3x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.3x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.35:
-                                f_out.write(",1.35x-"+str(i+1))
+                                f_out.write(",1.35x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.35x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.36:
-                                f_out.write(",1.36x-"+str(i+1))
+                                f_out.write(",1.36x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.36x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.4:
-                                f_out.write(",1.4x-"+str(i+1))
+                                f_out.write(",1.4x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.4x-NA")
                                 break
                         for i in range(len(best_tuning_result)):
                             if best_tuning_result[i] <= best_result_by_grid_search*1.5:
-                                f_out.write(",1.5x-"+str(i+1))
+                                f_out.write(",1.5x-"+str(num_func_eval[i]))
                                 break
                             if i == len(best_tuning_result)-1:
                                 f_out.write(",1.5x-NA")
@@ -661,7 +676,8 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.fill_between(num_func_eval, best_tuning_result-np.std(batches_best_tuning_result_, axis=0), best_tuning_result+np.std(batches_best_tuning_result_, axis=0), color=color_code, alpha=0.2)
     
                     elif objective == "std":
-                        min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        #min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        min_bound = 400 #min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
                         start_point = 0
                         for i in range(min_bound):
                             not_yet = False
@@ -678,28 +694,32 @@ def gen_plots(n_rows, n_cols, failure_handling):
     
                 if objective == "median" or objective == "mean":
                     ax.set_title("Matrix: $\mathsf{"+mattype+"}$")
+                    #ax.legend(loc='upper right')
     
                     if mattype == "GA" or mattype =="T5":
-                        #ax.set_xlim(0, 400) #1000)
-                        #ax.set_xticks([0,200,400]) #,600,800,1000])
-                        #ax.set_xticklabels(["0","200","400"]) #,"600","800","1000"])
-                        ax.set_xlim(0, 1000)
-                        ax.set_xticks([0,200,400,600,800,1000])
-                        ax.set_xticklabels(["0","200","400","600","800","1000"])
+                        ax.set_xlim(0, 400) #1000)
+                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 1000)
+                        #ax.set_xticks([0,200,400,600,800,1000])
+                        #ax.set_xticklabels(["0","200","400","600","800","1000"])
                     elif mattype == "T3":
-                        #ax.set_xlim(0, 400) #1000)
-                        #ax.set_xticks([0,200,400]) #,600,800,1000])
-                        #ax.set_xticklabels(["0","200","400"]) #,"600","800","1000"])
-                        ax.set_xlim(0, 1200)
-                        ax.set_xticks([0,200,400,600,800,1000,1200])
-                        ax.set_xticklabels(["0","200","400","600","800","1000","1200"])
+                        ax.set_xlim(0, 400) #1000)
+                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 1200)
+                        #ax.set_xticks([0,200,400,600,800,1000,1200])
+                        #ax.set_xticklabels(["0","200","400","600","800","1000","1200"])
                     elif mattype == "T1":
-                        #ax.set_xlim(0, 400) #1000)
-                        #ax.set_xticks([0,200,400]) #,600,800,1000])
-                        #ax.set_xticklabels(["0","200","400"]) #,"600","800","1000"])
-                        ax.set_xlim(0, 2000)
-                        ax.set_xticks([0,500,1000,1500,2000])
-                        ax.set_xticklabels(["0","500","1000","1500","2000"])
+                        ax.set_xlim(0, 400) #1000)
+                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 800)
+                        #ax.set_xticks([0,200,400,600,800]) #,600,800,1000])
+                        #ax.set_xticklabels(["0","200","400","600","800"]) #,"600","800","1000"])
+                        #ax.set_xlim(0, 2000)
+                        #ax.set_xticks([0,500,1000,1500,2000])
+                        #ax.set_xticklabels(["0","500","1000","1500","2000"])
                     #ax.set_xlim(0, 450)
                     ax.set_ylim(0.5, 2.0)
     
@@ -737,13 +757,13 @@ def gen_plots(n_rows, n_cols, failure_handling):
     fig_title = "Tuning of the SAP algorithms (m: "+str(n_rows)+", n: "+str(n_cols)+")"
     fig.suptitle(fig_title, fontsize=15)
 
-    fig.text(0.25, 0.50,
-            "(a) Tuned performance depending on the number of function evaluations",
+    fig.text(0.15, 0.50,
+            "(a) Tuned performance depending on the number of function evaluations (until 50 function evaluations)",
             fontsize = 16,
             color = "black")
 
-    fig.text(0.23, 0.03,
-            "(b) Tuned performance depending on the accumulated function evaluation time",
+    fig.text(0.20, 0.03,
+            "(b) Tuned performance depending on the accumulated function evaluation time (until 400s)",
             fontsize = 16,
             color = "black")
 
@@ -751,6 +771,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
     fig.savefig("plots/"+experiment_name+".pdf")
 
     f_out.close()
+    f_out2.close()
 
 if __name__ == "__main__":
 
