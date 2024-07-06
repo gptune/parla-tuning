@@ -33,10 +33,10 @@ def parse_args():
     parser.add_argument('-npilot', type=int, default=0, help='Number of initial samples per task')
     parser.add_argument('-nthreads', type=int, default=8)
 
-    parser.add_argument('-mattype', type=str, default="GA")
+    parser.add_argument('-dataset', type=str, default="GA")
     parser.add_argument('-n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-n_cols', type=int, default=1, help="n_cols")
-    parser.add_argument('-source_mattype', type=str, default="GA")
+    parser.add_argument('-source_dataset', type=str, default="GA")
     parser.add_argument('-source_n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-source_n_cols', type=int, default=1, help="n_cols")
     parser.add_argument('-failure_handling', type=str, default="highval")
@@ -51,10 +51,10 @@ def parse_args():
 def objectives(point):
     global A, b
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -197,11 +197,11 @@ def main():
 
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -218,14 +218,14 @@ def main():
     global source_failure_handling
 
     args = parse_args()
-    mattype = str(args.mattype)
-    print ("mattype: ", mattype)
+    dataset = str(args.dataset)
+    print ("dataset: ", dataset)
     n_rows = args.n_rows
     print ("n_rows: ", n_rows)
     n_cols = args.n_cols
     print ("n_cols: ", n_cols)
-    source_mattype = str(args.source_mattype)
-    print ("source_mattype: ", source_mattype)
+    source_dataset = str(args.source_dataset)
+    print ("source_dataset: ", source_dataset)
     source_n_rows = args.source_n_rows
     print ("source_n_rows: ", source_n_rows)
     source_n_cols = args.source_n_cols
@@ -245,10 +245,12 @@ def main():
 
     niter = 5
 
-    A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    #A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-dataset_"+str(dataset)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    A = np.genfromtxt("../input/"+dataset+"/"+dataset+"-data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     A = np.delete(A, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
 
-    b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    #b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-dataset_"+str(dataset)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    b = np.genfromtxt("../input/"+dataset+"/"+dataset+"-result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     b = np.delete(b, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
     b = b.ravel()
 
@@ -265,7 +267,7 @@ def main():
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "GPTUNE-TLA-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+        "tuning_problem_name": "GPTUNE-TLA-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
         "historydb_path": "gptune_tla.db",
         "machine_configuration": {
             "machine_name": "millennium",
@@ -350,27 +352,27 @@ def main():
     gt = GPTune(problem, computer=computer, data=data, options=options, historydb=historydb, driverabspath=os.path.abspath(__file__))
 
     def LoadSourceFunctionEvaluations():
-        with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
+        with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-dataset_"+str(source_dataset)+"-batch_num_1.json") as f_in:
             function_evaluations = json.load(f_in)["func_eval"]
             print ("loaded function evaluations: ", function_evaluations)
 
             best_obj = None
             best_func_eval = None
-            reference_normalized_residual_error_to_Axstar_ = None
+            reference_normalized_residual_error_to_Axstar = None
 
             for i in range(len(function_evaluations)):
                 func_eval = function_evaluations[i]
                 wall_clock_time = np.average(func_eval["additional_output"]["parla_times"])
                 normalized_residual_error_to_Axstar = np.average(func_eval["additional_output"]["normalized_residual_errors_to_Axstar"])
                 if i == 0:
-                    reference_normalized_residual_error_to_Axstar_ = normalized_residual_error_to_Axstar
+                    reference_normalized_residual_error_to_Axstar = normalized_residual_error_to_Axstar
 
                 if i == 0:
                     best_obj = wall_clock_time
                     best_func_eval = func_eval
                 else:
                     if failure_handling == "highval":
-                        if np.average(normalized_residual_error_to_Axstar) > 10*(reference_normalized_residual_error_to_Axstar_):
+                        if np.average(normalized_residual_error_to_Axstar) > 10*(reference_normalized_residual_error_to_Axstar):
                             pass
                         else:
                             if wall_clock_time < best_obj:

@@ -44,7 +44,7 @@ def gen_plot():
         with open("grid_search/grid_search.db/"+dbfile, "r") as f_in:
             function_evaluations = json.load(f_in)
             for func_eval in function_evaluations:
-                if func_eval["tuning_parameter"]["rls_method"] == "blendenpik" and \
+                if func_eval["tuning_parameter"]["rls_method"] == "QR-LSQR" and \
                    func_eval["tuning_parameter"]["sketch_operator"] == "sjlt" and \
                    func_eval["tuning_parameter"]["sampling_factor"] == 5.0 and \
                    func_eval["tuning_parameter"]["vec_nnz"] == 50:
@@ -81,7 +81,7 @@ def gen_plot():
                 normalized_residual_error_to_Axstar = func_eval["evaluation_result"]["normalized_residual_error_to_Axstar"]
                 wall_clock_time = func_eval["evaluation_result"]["wall_clock_time"]
 
-                if rls_method == "blendenpik" and\
+                if rls_method == "QR-LSQR" and\
                    sketch_operator == "less_uniform" and\
                    sampling_factor == 1 and\
                    vec_nnz == 1:
@@ -91,7 +91,7 @@ def gen_plot():
                         "ARFE": normalized_residual_error_to_Axstar
                     })
 
-                if rls_method == "blendenpik" and\
+                if rls_method == "QR-LSQR" and\
                    sketch_operator == "less_uniform" and\
                    sampling_factor == 5 and\
                    vec_nnz == 1:
@@ -101,7 +101,7 @@ def gen_plot():
                         "ARFE": normalized_residual_error_to_Axstar
                     })
 
-                if rls_method == "blendenpik" and\
+                if rls_method == "QR-LSQR" and\
                    sketch_operator == "less_uniform" and\
                    sampling_factor == 5 and\
                    vec_nnz == 10:
@@ -111,7 +111,7 @@ def gen_plot():
                         "ARFE": normalized_residual_error_to_Axstar
                     })
 
-                if rls_method == "blendenpik" and\
+                if rls_method == "QR-LSQR" and\
                    sketch_operator == "less_uniform" and\
                    sampling_factor == 5 and\
                    vec_nnz == 100:

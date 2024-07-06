@@ -31,6 +31,7 @@ def parse_args():
 
     parser.add_argument('-n_rows', type=int, default=50000, help="n_rows")
     parser.add_argument('-n_cols', type=int, default=1000, help="n_cols")
+    parser.add_argument('-dataset', type=str, default="musk")
     parser.add_argument('-n_samples', type=int, default=10, help="n_samples")
     parser.add_argument('-batch_num', type=int, default=1, help="Batch num")
 
@@ -47,12 +48,13 @@ def main():
     args = parse_args()
     n_samples = args.n_samples
     batch_num = args.batch_num
+    dataset = str(args.dataset)
     n_rows = args.n_rows
     n_cols = args.n_cols
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-n_samples_"+str(n_samples)+"-batch_num_"+str(batch_num)+"-temp",
+        "tuning_problem_name": "LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+dataset+"-n_samples_"+str(n_samples)+"-batch_num_"+str(batch_num)+"-temp",
         "machine_configuration": {
             "machine_name": "millennium",
             "xeon": { "nodes": 1, "cores": 8 }
@@ -110,7 +112,7 @@ def main():
     options['sample_random_seed'] = batch_num
     options['model_class'] = 'Model_GPy_LCM'
     options['model_random_seed'] = batch_num
-    options['search_class'] = 'SearchPyMoo'
+    options['search_class'] = 'SearchPyGMO'
     options['search_random_seed'] = batch_num
     options.validate(computer=computer)
 
@@ -122,9 +124,9 @@ def main():
     (data, modeler, stats) = gt.SLA(NS=n_samples, NS1=n_samples, Tgiven=giventask)
     print("stats: ", stats)
 
-    with open ("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-n_samples_"+str(n_samples)+"-batch_num_"+str(batch_num)+"-temp.json", "r") as f_in:
+    with open ("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+dataset+"-n_samples_"+str(n_samples)+"-batch_num_"+str(batch_num)+"-temp.json", "r") as f_in:
         function_evaluations_ = json.load(f_in)["func_eval"]
-    with open ("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-n_samples_"+str(n_samples)+"-batch_num_"+str(batch_num)+".json", "w") as f_out:
+    with open ("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+dataset+"-n_samples_"+str(n_samples)+"-batch_num_"+str(batch_num)+".json", "w") as f_out:
         samples = []
         for func_eval_ in function_evaluations_:
             sample = func_eval_["tuning_parameter"]

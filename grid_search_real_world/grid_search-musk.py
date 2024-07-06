@@ -23,7 +23,6 @@ global seed
 global n_rows
 global n_cols
 global tolerance
-global mattype
 global nthreads
 global x_star
 global direct_time
@@ -35,7 +34,6 @@ def parse_args():
 
     parser.add_argument('-nthreads', type=int, default=8)
     parser.add_argument('-tolerance', type=str, default=1e-6)
-    parser.add_argument('-mattype', type=str, default="GA")
     parser.add_argument('-n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-n_cols', type=int, default=1, help="n_cols")
 
@@ -52,7 +50,6 @@ def objective(params):
     global n_rows
     global n_cols
     global tolerance
-    global mattype
     global nthreads
     global x_star
     global direct_time
@@ -67,7 +64,7 @@ def objective(params):
     n,d = A.shape # in the task parameter definition (input matrix), we used term {n, d} instead of {m, n}; the value is stored in the DB file.
     #seed = 1
 
-    grid_search_logfile = "grid_search.db/GRID-SEARCH-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+"-tolerance_"+str(tolerance)+".json"
+    grid_search_logfile = "grid_search.db/GRID-SEARCH-MUSK-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-tolerance_"+str(tolerance)+".json"
     json_data_arr = []
 
     if not os.path.exists(grid_search_logfile):
@@ -183,7 +180,7 @@ def objective(params):
         "constants": {
             "niter": niter,
             "error_tolerance": tolerance,
-            "dataset": "synthetic_mvt",
+            "dataset": "MUSK",
             "nthreads": nthreads
         },
         "tuning_parameter": {
@@ -251,7 +248,6 @@ def run_grid_search():
     global n_rows
     global n_cols
     global tolerance
-    global mattype
     global nthreads
     global x_star
     global direct_time
@@ -264,16 +260,14 @@ def run_grid_search():
     print ("n_cols: ", n_cols)
     tolerance = float(args.tolerance)
     print ("tolerance: ", tolerance)
-    mattype = str(args.mattype)
-    print ("mattype: ", mattype)
     nthreads = args.nthreads
     print ("nthreads: ", nthreads)
     niter = 5
 
-    A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    A = np.genfromtxt("../input/musk/musk-data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     A = np.delete(A, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
 
-    b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    b = np.genfromtxt("../input/musk/musk-result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     b = np.delete(b, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
     b = b.ravel()
 
@@ -286,7 +280,8 @@ def run_grid_search():
 
     n_rows, n_cols = A.shape
 
-    for rls_method in ["QR-LSQR", "SVD-LSQR", "QR-PGD", "SVD-PGD"]:
+    #for rls_method in ["QR-LSQR", "SVD-LSQR", "QR-PGD", "SVD-PGD"]:
+    for rls_method in ["QR-LSQR", "SVD-LSQR", "SVD-PGD"]:
         for sketch_operator in ["sjlt","less_uniform"]:
             for sampling_factor in list(np.arange(1,11,1)):
                 for vec_nnz in list(np.arange(1,10,1))+list(np.arange(10,101,10)):
@@ -307,7 +302,6 @@ if __name__ == "__main__":
     global n_rows
     global n_cols
     global tolerance
-    global mattype
     global nthreads
     global x_star
     global direct_time

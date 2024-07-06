@@ -26,10 +26,10 @@ def parse_args():
     parser.add_argument('-npilot', type=int, default=0, help='Number of initial samples per task')
     parser.add_argument('-nthreads', type=int, default=8)
 
-    parser.add_argument('-mattype', type=str, default="GA")
+    parser.add_argument('-dataset', type=str, default="GA")
     parser.add_argument('-n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-n_cols', type=int, default=1, help="n_cols")
-    parser.add_argument('-source_mattype', type=str, default="GA")
+    parser.add_argument('-source_dataset', type=str, default="GA")
     parser.add_argument('-source_n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-source_n_cols', type=int, default=1, help="n_cols")
     parser.add_argument('-failure_handling', type=str, default="highval")
@@ -54,10 +54,10 @@ def objectives(point):
 
     global A, b
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -203,11 +203,11 @@ def LoadSourceFunctionEvaluations(rls_method, sketch_operator):
 
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -222,7 +222,7 @@ def LoadSourceFunctionEvaluations(rls_method, sketch_operator):
     global source_failure_handling
     global mab_policy
 
-    with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
+    with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-dataset_"+str(source_dataset)+"-batch_num_1.json") as f_in:
         function_evaluations = []
         function_evaluations_ = json.load(f_in)["func_eval"][0:100]
         #print ("loaded function evaluations: ", function_evaluations)
@@ -274,11 +274,11 @@ def LoadBestSourceFunctionEvaluation():
 
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -293,7 +293,7 @@ def LoadBestSourceFunctionEvaluation():
     global source_failure_handling
     global mab_policy
 
-    with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
+    with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-dataset_"+str(source_dataset)+"-batch_num_1.json") as f_in:
         function_evaluations = json.load(f_in)["func_eval"][0:100]
         #print ("loaded function evaluations: ", function_evaluations)
 
@@ -334,11 +334,11 @@ def RunTLA_SourceGreedy(nrun):
 
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -355,15 +355,15 @@ def RunTLA_SourceGreedy(nrun):
     global source_failure_handling
     global mab_policy
 
-    if os.path.exists("gptune_tla.db/GPTUNE-TLA_SourceGreedy-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json"):
+    if os.path.exists("gptune_tla.db/GPTUNE-TLA_SourceGreedy-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json"):
         print ("experiment was already performed")
-        print ("gptune_tla.db/GPTUNE-TLA_SourceGreedy-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json")
+        print ("gptune_tla.db/GPTUNE-TLA_SourceGreedy-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json")
         return
 
     for NS in range(1, nrun+1, 1):
         """ tuning meta information """
         tuning_metadata = {
-            "tuning_problem_name": "GPTUNE-TLA_SourceGreedy-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+            "tuning_problem_name": "GPTUNE-TLA_SourceGreedy-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
             "historydb_path": "gptune_tla.db",
             "machine_configuration": {
                 "machine_name": "millennium",
@@ -408,7 +408,7 @@ def RunTLA_SourceGreedy(nrun):
             def LoadCategory():
                 num_categories = 6
                 evaluations_per_category = [[] for i in range(num_categories)]
-                with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
+                with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-dataset_"+str(source_dataset)+"-batch_num_1.json") as f_in:
                     function_evaluations = json.load(f_in)["func_eval"][0:100]
                     for i in range(len(function_evaluations)):
                         func_eval = function_evaluations[i]
@@ -465,7 +465,7 @@ def RunTLA_SourceGreedy(nrun):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -527,11 +527,11 @@ def RunTLA_SourceGreedyEpsilon(nrun, epsilon):
 
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -550,15 +550,15 @@ def RunTLA_SourceGreedyEpsilon(nrun, epsilon):
 
     print ("ASDFASDF")
 
-    if os.path.exists("gptune_tla.db/GPTUNE-TLA_SourceGreedyEpsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json"):
+    if os.path.exists("gptune_tla.db/GPTUNE-TLA_SourceGreedyEpsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json"):
         print ("experiment was performed")
-        print ("gptune_tla.db/GPTUNE-TLA_SourceGreedyEpsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json")
+        print ("gptune_tla.db/GPTUNE-TLA_SourceGreedyEpsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json")
         return
 
     for NS in range(1, nrun+1, 1):
         """ tuning meta information """
         tuning_metadata = {
-            "tuning_problem_name": "GPTUNE-TLA_SourceGreedyEpsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+            "tuning_problem_name": "GPTUNE-TLA_SourceGreedyEpsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
             "historydb_path": "gptune_tla.db",
             "machine_configuration": {
                 "machine_name": "millennium",
@@ -608,7 +608,7 @@ def RunTLA_SourceGreedyEpsilon(nrun, epsilon):
                 else:
                     num_categories = 6
                     evaluations_per_category = [[] for i in range(num_categories)]
-                    with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
+                    with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-dataset_"+str(source_dataset)+"-batch_num_1.json") as f_in:
                         function_evaluations = json.load(f_in)["func_eval"][0:100]
                         for i in range(len(function_evaluations)):
                             func_eval = function_evaluations[i]
@@ -665,7 +665,7 @@ def RunTLA_SourceGreedyEpsilon(nrun, epsilon):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -726,11 +726,11 @@ def RunTLA_TargetGreedy(nrun, trials):
     global A, b
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -746,14 +746,14 @@ def RunTLA_TargetGreedy(nrun, trials):
     global source_failure_handling
     global mab_policy
 
-    if os.path.exists("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json"):
+    if os.path.exists("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json"):
         print ("experiment was already performed")
-        print ("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json")
+        print ("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json")
         return
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+        "tuning_problem_name": "GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
         "historydb_path": "gptune_tla.db",
         "machine_configuration": {
             "machine_name": "millennium",
@@ -807,7 +807,7 @@ def RunTLA_TargetGreedy(nrun, trials):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -909,7 +909,7 @@ def RunTLA_TargetGreedy(nrun, trials):
                 "rls_method": rls_method,
                 "sketch_operator": sketch_operator,
                 "niter": niter,
-                "dataset": "synthetic",
+                "dataset": dataset,
                 "nthreads": nthreads
             }
         
@@ -955,7 +955,7 @@ def RunTLA_TargetGreedy(nrun, trials):
 
     num_categories = 6
     evaluations_per_category = [[] for i in range(num_categories)]
-    with open("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json", "r") as f_in:
+    with open("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json", "r") as f_in:
         function_evaluations = json.load(f_in)["func_eval"][2:]
         for i in range(len(function_evaluations)):
             func_eval = function_evaluations[i]
@@ -1029,7 +1029,7 @@ def RunTLA_TargetGreedy(nrun, trials):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -1084,11 +1084,11 @@ def RunTLA_TargetGreedyEpsilon(nrun, trials, epsilon):
     global A, b
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -1104,14 +1104,14 @@ def RunTLA_TargetGreedyEpsilon(nrun, trials, epsilon):
     global source_failure_handling
     global mab_policy
 
-    if os.path.exists("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json"):
+    if os.path.exists("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json"):
         print ("experiment was already performed")
-        print ("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json")
+        print ("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json")
         return
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+        "tuning_problem_name": "GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
         "historydb_path": "gptune_tla.db",
         "machine_configuration": {
             "machine_name": "millennium",
@@ -1165,7 +1165,7 @@ def RunTLA_TargetGreedyEpsilon(nrun, trials, epsilon):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -1267,7 +1267,7 @@ def RunTLA_TargetGreedyEpsilon(nrun, trials, epsilon):
                 "rls_method": rls_method,
                 "sketch_operator": sketch_operator,
                 "niter": niter,
-                "dataset": "synthetic",
+                "dataset": dataset,
                 "nthreads": nthreads
             }
         
@@ -1334,7 +1334,7 @@ def RunTLA_TargetGreedyEpsilon(nrun, trials, epsilon):
         else:
             num_categories = 6
             evaluations_per_category = [[] for i in range(num_categories)]
-            with open("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json", "r") as f_in:
+            with open("gptune_tla.db/GPTUNE-TLA_TargetGreedyTrials"+str(trials)+"Epsilon"+str(epsilon)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json", "r") as f_in:
                 function_evaluations = json.load(f_in)["func_eval"][2:]
                 for i in range(len(function_evaluations)):
                     func_eval = function_evaluations[i]
@@ -1390,7 +1390,7 @@ def RunTLA_TargetGreedyEpsilon(nrun, trials, epsilon):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
             }
 
@@ -1445,11 +1445,11 @@ def RunTLA_UCB(nrun, trials, c_ucb):
     global A, b
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -1465,14 +1465,14 @@ def RunTLA_UCB(nrun, trials, c_ucb):
     global source_failure_handling
     global mab_policy
 
-    if os.path.exists("gptune_tla.db/GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json"):
+    if os.path.exists("gptune_tla.db/GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json"):
         print ("experiment was already performed")
-        print ("gptune_tla.db/GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json")
+        print ("gptune_tla.db/GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json")
         return
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+        "tuning_problem_name": "GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
         "historydb_path": "gptune_tla.db",
         "machine_configuration": {
             "machine_name": "millennium",
@@ -1526,7 +1526,7 @@ def RunTLA_UCB(nrun, trials, c_ucb):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -1628,7 +1628,7 @@ def RunTLA_UCB(nrun, trials, c_ucb):
                 "rls_method": rls_method,
                 "sketch_operator": sketch_operator,
                 "niter": niter,
-                "dataset": "synthetic",
+                "dataset": dataset,
                 "nthreads": nthreads
             }
         
@@ -1691,7 +1691,7 @@ def RunTLA_UCB(nrun, trials, c_ucb):
 
         num_categories = 6
         evaluations_per_category = [[] for i in range(num_categories)]
-        with open("gptune_tla.db/GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json") as f_in:
+        with open("gptune_tla.db/GPTUNE-TLA_UCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json") as f_in:
             function_evaluations = json.load(f_in)["func_eval"][2:]
             for i in range(len(function_evaluations)):
                 func_eval = function_evaluations[i]
@@ -1763,7 +1763,7 @@ def RunTLA_UCB(nrun, trials, c_ucb):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
             }
 
@@ -1818,11 +1818,11 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
     global A, b
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -1838,10 +1838,10 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
     global source_failure_handling
     global mab_policy
 
-    if os.path.exists("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json"):
+    if os.path.exists("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json"):
         #print ("experiment was already performed")
-        print ("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json")
-        with open("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json") as f_in:
+        print ("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json")
+        with open("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json") as f_in:
             historical_function_evaluations = json.load(f_in)["func_eval"]
             NS_hist = len(historical_function_evaluations)
             NS = NS_hist + 1
@@ -1857,7 +1857,7 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
+        "tuning_problem_name": "GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num),
         "historydb_path": "gptune_tla.db",
         "machine_configuration": {
             "machine_name": "millennium",
@@ -1915,7 +1915,7 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         }
     
@@ -2024,7 +2024,7 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
                 "rls_method": rls_method,
                 "sketch_operator": sketch_operator,
                 "niter": niter,
-                "dataset": "synthetic",
+                "dataset": dataset,
                 "nthreads": nthreads
             }
         
@@ -2094,7 +2094,7 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
         num_categories = 6
 
         source_evaluations_per_category = [[] for i in range(num_categories)]
-        with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
+        with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-dataset_"+str(source_dataset)+"-batch_num_1.json") as f_in:
             function_evaluations = json.load(f_in)["func_eval"][0:100]
             for i in range(len(function_evaluations)):
                 func_eval = function_evaluations[i]
@@ -2119,7 +2119,7 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
         print ("source_average_evaluations_per_category: ", source_average_evaluations_per_category)
 
         target_evaluations_per_category = [[] for i in range(num_categories)]
-        with open("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num)+".json") as f_in:
+        with open("gptune_tla.db/GPTUNE-TLA_HUCB_Trials"+str(trials)+"_CUCB_"+str(c_ucb)+"_CHIST_"+str(c_hist)+"-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-dataset_"+str(dataset)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_dataset_"+str(source_dataset)+"-batch_num_"+str(batch_num)+".json") as f_in:
             target_function_evaluations = json.load(f_in)["func_eval"][2:]
             for i in range(len(target_function_evaluations)):
                 func_eval = target_function_evaluations[i]
@@ -2198,7 +2198,7 @@ def RunTLA_HUCB(nrun, trials, c_ucb, c_hist):
             "rls_method": rls_method,
             "sketch_operator": sketch_operator,
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
             }
 
@@ -2256,11 +2256,11 @@ def main():
 
     global seed
 
-    global mattype
+    global dataset
     global n_rows
     global n_cols
 
-    global source_mattype
+    global source_dataset
     global source_n_rows
     global source_n_cols
 
@@ -2278,14 +2278,14 @@ def main():
     global mab_policy
 
     args = parse_args()
-    mattype = str(args.mattype)
-    print ("mattype: ", mattype)
+    dataset = str(args.dataset)
+    print ("dataset: ", dataset)
     n_rows = args.n_rows
     print ("n_rows: ", n_rows)
     n_cols = args.n_cols
     print ("n_cols: ", n_cols)
-    source_mattype = str(args.source_mattype)
-    print ("source_mattype: ", source_mattype)
+    source_dataset = str(args.source_dataset)
+    print ("source_dataset: ", source_dataset)
     source_n_rows = args.source_n_rows
     print ("source_n_rows: ", source_n_rows)
     source_n_cols = args.source_n_cols
@@ -2307,10 +2307,12 @@ def main():
 
     niter = 5
 
-    A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    #A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-dataset_"+str(dataset)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    A = np.genfromtxt("../input/"+dataset+"/"+dataset+"-data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     A = np.delete(A, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
 
-    b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    #b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-dataset_"+str(dataset)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    b = np.genfromtxt("../input/"+dataset+"/"+dataset+"-result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     b = np.delete(b, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
     b = b.ravel()
 

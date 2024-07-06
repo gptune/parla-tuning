@@ -49,11 +49,12 @@ def gen_plot():
         with open("grid_search/grid_search.db/"+dbfile, "r") as f_in:
             function_evaluations = json.load(f_in)
             for func_eval in function_evaluations:
-                if func_eval["tuning_parameter"]["rls_method"] == "blendenpik" and \
+                if func_eval["tuning_parameter"]["rls_method"] == "QR-LSQR" and \
                    func_eval["tuning_parameter"]["sketch_operator"] == "sjlt" and \
                    func_eval["tuning_parameter"]["sampling_factor"] == 5.0 and \
                    func_eval["tuning_parameter"]["vec_nnz"] == 50:
                     reference_normalized_residual_error_to_Axstar = func_eval["evaluation_result"]["normalized_residual_error_to_Axstar"]
+                    reference_runtime = func_eval["evaluation_result"]["wall_clock_time"]
 
         for tolerance in [1e-6, 1e-8, 1e-10]:
             if tolerance == 1e-6:
@@ -75,17 +76,17 @@ def gen_plot():
                 normalized_residual_error_to_Axstar = func_eval["evaluation_result"]["normalized_residual_error_to_Axstar"]
                 wall_clock_time = func_eval["evaluation_result"]["wall_clock_time"]
 
-                if rls_method == "blendenpik" and sketch_operator == "sjlt":
+                if rls_method == "QR-LSQR" and sketch_operator == "sjlt":
                     category = 0
-                elif rls_method == "lsrn" and sketch_operator == "sjlt":
+                elif rls_method == "SVD-LSQR" and sketch_operator == "sjlt":
                     category = 1
-                elif rls_method == "newtonsketch" and sketch_operator == "sjlt":
+                elif rls_method == "SVD-PGD" and sketch_operator == "sjlt":
                     category = 2
-                elif rls_method == "blendenpik" and sketch_operator == "less_uniform":
+                elif rls_method == "QR-LSQR" and sketch_operator == "less_uniform":
                     category = 3
-                elif rls_method == "lsrn" and sketch_operator == "less_uniform":
+                elif rls_method == "SVD-LSQR" and sketch_operator == "less_uniform":
                     category = 4
-                elif rls_method == "newtonsketch" and sketch_operator == "less_uniform":
+                elif rls_method == "SVD-PGD" and sketch_operator == "less_uniform":
                     category = 5
 
                 sampling_factor_map = {1:0, 2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:8, 10:9}
@@ -96,25 +97,26 @@ def gen_plot():
         inner = gridspec.GridSpecFromSubplotSpec(2, 3,
                         subplot_spec=outer[matrix_id], wspace=0.05, hspace=0.02)
 
+        best_wall_clock_time_result_arr = []
         for category_id in range(6):
             ax = plt.Subplot(fig, inner[category_id])
             if category_id == 0:
-                rls_method = "blendenpik"
+                rls_method = "QR-LSQR"
                 sketch_operator = "sjlt"
             elif category_id == 1:
-                rls_method = "lsrn"
+                rls_method = "SVD-LSQR"
                 sketch_operator = "sjlt"
             elif category_id == 2:
-                rls_method = "newtonsketch"
+                rls_method = "SVD-PGD"
                 sketch_operator = "sjlt"
             elif category_id == 3:
-                rls_method = "blendenpik"
+                rls_method = "QR-LSQR"
                 sketch_operator = "less_uniform"
             elif category_id == 4:
-                rls_method = "lsrn"
+                rls_method = "SVD-LSQR"
                 sketch_operator = "less_uniform"
             elif category_id == 5:
-                rls_method = "newtonsketch"
+                rls_method = "SVD-PGD"
                 sketch_operator = "less_uniform"
 
             x_ = []
@@ -152,6 +154,7 @@ def gen_plot():
             vec_nnz_orig_map = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 20, 12: 30, 13: 40, 14: 50, 15: 60, 16: 70, 17: 80, 18: 90, 19: 100 }
             #label = str(round(float(best_wall_clock_time_result),1)) + "s (" + str(best_x) + ", " + str(vec_nnz_orig_map[best_y]) + ")"
             label = str(round(float(best_wall_clock_time_result),1)) + "s"
+            best_wall_clock_time_result_arr.append(best_wall_clock_time_result)
             ax.plot(best_x, best_y, '*', color='black', label="Best", markersize=5)
 
             if mattype == "T1" and (category_id==3 or category_id==4):
@@ -197,9 +200,9 @@ def gen_plot():
             fig.add_subplot(ax)
 
             name_map_rls_method = {
-                    "blendenpik": "QR-LSQR",
-                    "lsrn": "SVD-LSQR",
-                    "newtonsketch": "SVD-PGD"
+                    "QR-LSQR": "QR-LSQR",
+                    "SVD-LSQR": "SVD-LSQR",
+                    "SVD-PGD": "SVD-PGD"
                     }
             name_map_sketch_operator = {
                     "sjlt": "SJLT",
@@ -233,6 +236,11 @@ def gen_plot():
                 ax.set_yticklabels([])
                 #ax.set_xticks([])
                 #ax.set_xticklabels([])
+
+        print ("mattype: ", mattype)
+        print ("best_wall_clock_time_result: ", min(best_wall_clock_time_result_arr))
+        print ("reference_runtime: ", reference_runtime)
+        print ("improve: ", float(reference_runtime)/float(min(best_wall_clock_time_result_arr)))
 
         fig_title = "Performance of the SAP algorithms (m: "+str(n_rows)+", n: "+str(n_cols)+")"
         fig.suptitle(fig_title, fontsize=15)

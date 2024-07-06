@@ -73,7 +73,7 @@ def objectives(point):
     print ("vec_nnz: ", vec_nnz)
 
     initial_eval = False
-    if rls_method == "blendenpik" and \
+    if rls_method == "QR-LSQR" and \
        sketch_operator == "sjlt" and \
        sampling_factor == 5.0 and\
        vec_nnz == 50 and\
@@ -98,21 +98,21 @@ def objectives(point):
         rng = np.random.default_rng(seed)
         tic = time.time()
 
-        if rls_method == "blendenpik":
+        if rls_method == "QR-LSQR":
             if sketch_operator == "sjlt":
                 sap = rlsq.SPO(oblivious.SkOpSJ(vec_nnz=vec_nnz), sampling_factor=sampling_factor, mode='qr')
             elif sketch_operator == "less_uniform":
                 sap = rlsq.SPO(oblivious.SkOpNL(vec_nnz=vec_nnz), sampling_factor=sampling_factor, mode='qr')
             elif sketch_operator == "gaussian":
                 sap = rlsq.SPO(oblivious.SkOpGA(), sampling_factor=sampling_factor, mode='qr')
-        elif rls_method == "lsrn":
+        elif rls_method == "SVD-LSQR":
             if sketch_operator == "sjlt":
                 sap = rlsq.SPO(oblivious.SkOpSJ(vec_nnz=vec_nnz), sampling_factor=sampling_factor, mode='svd')
             elif sketch_operator == "less_uniform":
                 sap = rlsq.SPO(oblivious.SkOpNL(vec_nnz=vec_nnz), sampling_factor=sampling_factor, mode='svd')
             elif sketch_operator == "gaussian":
                 sap = rlsq.SPO(oblivious.SkOpGA(), sampling_factor=sampling_factor, mode='svd')
-        elif rls_method == "newtonsketch":
+        elif rls_method == "SVD-PGD":
             if sketch_operator == "sjlt":
                 sap = rlsq.SPO(oblivious.SkOpSJ(vec_nnz=vec_nnz), sampling_factor=sampling_factor, mode='svd')
                 sap.iterative_solver = PcSS3()
@@ -242,11 +242,11 @@ def main():
 
     """ input space """
     m = Integer(1000, 100000, transform="normalize", name="m")
-    n = Integer(1000, 10000, transform="normalize", name="n")
+    n = Integer(100, 10000, transform="normalize", name="n")
     input_space = Space([m,n])
 
     """ tuning parameter space """
-    rls_method = Categoricalnorm (["blendenpik", "lsrn", "newtonsketch"], transform="onehot", name="rls_method")
+    rls_method = Categoricalnorm (["QR-LSQR", "SVD-LSQR", "SVD-PGD"], transform="onehot", name="rls_method")
     sketch_operator = Categoricalnorm (["sjlt", "less_uniform"], transform="onehot", name="sketch_operator")
     sampling_factor = Real(1.0, 10.0, transform="normalize", name="sampling_factor")
     vec_nnz = Integer(1, 100, transform="normalize", name="vec_nnz")
@@ -296,7 +296,7 @@ def main():
     NS=nrun
 
     gt = GPTune(problem, computer=computer, data=data, options=options, historydb=historydb, driverabspath=os.path.abspath(__file__))
-    gt.EvaluateObjective(T=[n_rows, n_cols], P=[["blendenpik", "sjlt", 5.0, 50,0]])
+    gt.EvaluateObjective(T=[n_rows, n_cols], P=[["QR-LSQR", "sjlt", 5.0, 50,0]])
     (data, modeler, stats) = gt.SLA(NS=NS, NS1=npilot, Tgiven=giventask)
     print("stats: ", stats)
 

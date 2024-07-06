@@ -25,16 +25,16 @@ sys.path.insert(0, os.path.abspath(__file__ + "/../../GPTune/GPTune/"))
 global analysis_dir
 global analysis_output
 
-def sobol_analysis(n_rows, n_cols, mattype, failure_handling):
+def sobol_analysis(n_rows, n_cols, dataset, failure_handling):
 
     global analysis_dir
     global analysis_output
 
-    input_dir = "tuning_tla/lhsmdu.db/"
-    input_file = "LHSMDU-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+"-batch_num_1.json"
+    input_dir = "tuning_tla_real_world/lhsmdu.db/"
+    input_file = "LHSMDU-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+str(dataset)+"-batch_num_1.json"
 
     #input_dir = "tuning_tla_mab_mil_update/lhsmdu.db/"
-    #input_file = "LHSMDU-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+"-batch_num_1.json"
+    #input_file = "LHSMDU-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+str(dataset)+"-batch_num_1.json"
 
     print ("input_file: ", input_file)
 
@@ -57,10 +57,10 @@ def sobol_analysis(n_rows, n_cols, mattype, failure_handling):
     problem_space = {
         "input_space": [
             {"name":"m", "type":"integer", "transformer":"normalize", "lower_bound":1000, "upper_bound":100000},
-            {"name":"n", "type":"integer", "transformer":"normalize", "lower_bound":1000, "upper_bound":10000}
+            {"name":"n", "type":"integer", "transformer":"normalize", "lower_bound":100, "upper_bound":10000}
         ],
         "parameter_space": [
-            {"name":"rls_method", "type":"categorical", "transformer":"onehot", "categories":['blendenpik','lsrn','newtonsketch']},
+            {"name":"rls_method", "type":"categorical", "transformer":"onehot", "categories":['QR-LSQR','SVD-LSQR','SVD-PGD']},
             {"name":"sketch_operator", "type":"categorical", "transformer":"onehot", "categories":["sjlt","less_uniform"]},
             {"name":"sampling_factor", "type":"real", "transformer":"normalize", "lower_bound":1.0, "upper_bound":10.0},
             {"name":"vec_nnz", "type":"integer", "transformer":"normalize", "lower_bound":1, "upper_bound":100},
@@ -92,7 +92,7 @@ def sobol_analysis(n_rows, n_cols, mattype, failure_handling):
         ret["input_problem"] = {
             "n_rows": n_rows,
             "n_cols": n_cols,
-            "mattype": mattype,
+            "dataset": dataset,
             "input_file": input_file,
             "num_function_evaluations": len(function_evaluations),
             "num_samples_for_sobol_analysis": n_samples
@@ -100,14 +100,14 @@ def sobol_analysis(n_rows, n_cols, mattype, failure_handling):
         json_data.append(ret)
         json.dump(json_data, f_out, indent=2)
     with open(analysis_dir+"/"+analysis_output+".csv", "a") as f_out:
-        f_out.write("n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+", ")
+        f_out.write("n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+str(dataset)+", ")
         f_out.write("rls_method: "+str(round(ret["S1"]["rls_method"],2)) + " & sketch_operator: "+str(round(ret["S1"]["rls_method"],2)) + " & sampling_factor: "+ str(round(ret["S1"]["sampling_factor"],2)) + " & vec_nnz: "+str(round(ret["S1"]["vec_nnz"],2))+", ")
         f_out.write("rls_method: "+str(round(ret["S1_conf"]["rls_method"],2)) + " & sketch_operator: "+str(round(ret["S1_conf"]["rls_method"],2)) + " & sampling_factor: "+ str(round(ret["S1_conf"]["sampling_factor"],2)) + " & vec_nnz: "+str(round(ret["S1_conf"]["vec_nnz"],2))+", ")
         f_out.write("rls_method: "+str(round(ret["ST"]["rls_method"],2)) + " & sketch_operator: "+str(round(ret["ST"]["rls_method"],2)) + " & sampling_factor: "+ str(round(ret["ST"]["sampling_factor"],2)) + " & vec_nnz: "+str(round(ret["ST"]["vec_nnz"],2))+", ")
         f_out.write("rls_method: "+str(round(ret["ST_conf"]["rls_method"],2)) + " & sketch_operator: "+str(round(ret["ST_conf"]["rls_method"],2)) + " & sampling_factor: "+ str(round(ret["ST_conf"]["sampling_factor"],2)) + " & vec_nnz: "+str(round(ret["ST_conf"]["vec_nnz"],2))+"\n")
     with open(analysis_dir+"/"+analysis_output+".tex", "a") as f_out:
         #f_out.write("n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-condnum_"+str(condnum)+"-coherence_type_"+str(coherence_type)+"-tolerance_"+str(tolerance)+" & ")
-        f_out.write(str(mattype) + " & ")
+        f_out.write(str(dataset) + " & ")
         f_out.write(str(round(ret["S1"]["rls_method"],2)) + " (" + str(round(ret["S1_conf"]["rls_method"],2)) + ") & ")
         f_out.write(str(round(ret["S1"]["sketch_operator"],2)) + " (" + str(round(ret["S1_conf"]["sketch_operator"],2)) + ") & ")
         f_out.write(str(round(ret["S1"]["sampling_factor"],2)) + " (" + str(round(ret["S1_conf"]["sampling_factor"],2)) + ") & ")
@@ -139,9 +139,17 @@ if __name__ == "__main__":
     with open(analysis_dir+"/"+analysis_output+".csv","a") as f_out:
         f_out.write("input problem, S1, S1_conf, ST, ST_conf\n")
 
-    n_rows = 10000
-    n_cols = 1000
     tolerance = 1e-6
-    for mattype in ["GA", "T5", "T3", "T1"]:
-        sobol_analysis(n_rows, n_cols, mattype, failure_handling)
+    #for dataset in ["Musk" GA", "T5", "T3", "T1"]:
+    for dataset in ["musk", "cifar-10", "slice_localization"]:
+        if dataset == "musk":
+            n_rows = 2048
+            n_cols = 166
+        elif dataset == "cifar-10":
+            n_rows = 8192
+            n_cols = 512
+        elif dataset == "slice_localization":
+            n_rows = 10000
+            n_cols = 385
+        sobol_analysis(n_rows, n_cols, dataset, failure_handling)
 

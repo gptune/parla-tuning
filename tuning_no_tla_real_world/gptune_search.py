@@ -31,33 +31,24 @@ def parse_args():
 
     parser.add_argument('-nrun', type=int, default=50, help='Number of runs per task')
     parser.add_argument('-npilot', type=int, default=0, help='Number of initial samples per task')
+    parser.add_argument('-dataset', type=str, default="musk")
     parser.add_argument('-nthreads', type=int, default=8)
-
-    parser.add_argument('-mattype', type=str, default="GA")
     parser.add_argument('-n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-n_cols', type=int, default=1, help="n_cols")
-    parser.add_argument('-source_mattype', type=str, default="GA")
-    parser.add_argument('-source_n_rows', type=int, default=1, help="n_rows")
-    parser.add_argument('-source_n_cols', type=int, default=1, help="n_cols")
-    parser.add_argument('-failure_handling', type=str, default="highval")
-    parser.add_argument('-source_failure_handling', type=str, default="highval")
-
     parser.add_argument('-batch_num', type=int, default=1, help="Batch num")
+    parser.add_argument('-failure_handling', type=str, default="highval")
 
     args = parser.parse_args()
 
     return args
 
 def objectives(point):
+
     global A, b
 
-    global mattype
     global n_rows
     global n_cols
-    global source_mattype
-    global source_n_rows
-    global source_n_cols
-
+    global dataset
     global nthreads
     global x_star
     global direct_time
@@ -68,7 +59,6 @@ def objectives(point):
     global reference_normalized_residual_errors_to_Axstar
 
     global failure_handling
-    global source_failure_handling
 
     m = point["m"]
     n = point["n"]
@@ -196,15 +186,9 @@ def main():
     global A, b
 
     global seed
-
-    global mattype
     global n_rows
     global n_cols
-
-    global source_mattype
-    global source_n_rows
-    global source_n_cols
-
+    global dataset
     global nthreads
     global x_star
     global direct_time
@@ -215,21 +199,14 @@ def main():
     global reference_normalized_residual_errors_to_Axstar
 
     global failure_handling
-    global source_failure_handling
 
     args = parse_args()
-    mattype = str(args.mattype)
-    print ("mattype: ", mattype)
     n_rows = args.n_rows
     print ("n_rows: ", n_rows)
     n_cols = args.n_cols
     print ("n_cols: ", n_cols)
-    source_mattype = str(args.source_mattype)
-    print ("source_mattype: ", source_mattype)
-    source_n_rows = args.source_n_rows
-    print ("source_n_rows: ", source_n_rows)
-    source_n_cols = args.source_n_cols
-    print ("source_n_cols: ", source_n_cols)
+    dataset = str(args.dataset)
+    print ("dataset: ", dataset)
     nthreads = args.nthreads
     print ("nthreads: ", nthreads)
     nrun = args.nrun
@@ -240,15 +217,12 @@ def main():
     print ("batch_num: ", batch_num)
     failure_handling = args.failure_handling
     print ("failure_handling: ", failure_handling)
-    source_failure_handling = args.source_failure_handling
-    print ("source_failure_handling: ", source_failure_handling)
 
     niter = 5
 
-    A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    A = np.genfromtxt("../input/"+dataset+"/"+dataset+"-data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     A = np.delete(A, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
-
-    b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    b = np.genfromtxt("../input/"+dataset+"/"+dataset+"-result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     b = np.delete(b, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
     b = b.ravel()
 
@@ -265,8 +239,8 @@ def main():
 
     """ tuning meta information """
     tuning_metadata = {
-        "tuning_problem_name": "GPTUNE-TLA-target-failure_handling_"+str(failure_handling)+"-"+str(n_rows)+"-"+str(n_cols)+"-mattype_"+str(mattype)+"-source-failure_handling_"+str(source_failure_handling)+"-"+str(source_n_rows)+"-"+str(source_n_cols)+"-source_mattype_"+str(source_mattype)+"-batch_num_"+str(batch_num),
-        "historydb_path": "gptune_tla.db",
+        "tuning_problem_name": "GPTUNE-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+str(dataset)+"-npilot_"+str(npilot)+"-batch_num_"+str(batch_num),
+        "historydb_path": "gptune.db",
         "machine_configuration": {
             "machine_name": "millennium",
             "xeon": { "nodes": 1, "cores": 8 }
@@ -306,7 +280,7 @@ def main():
     """ constant variables """
     constants = {
         "niter": niter,
-        "dataset": "synthetic",
+        "dataset": dataset,
         "nthreads": nthreads
     }
 
@@ -336,66 +310,38 @@ def main():
     options['search_class'] = 'SearchPyGMO'
     options['search_random_seed'] = batch_num
 
-    options['TLA_method'] = 'LCM'
-
     if failure_handling == "skip":
         options['model_output_constraint'] = 'Ignore'
     options.validate(computer=computer)
 
     """ run gptune """
-    giventask = [[n_rows, n_cols]]
-    NI=len(giventask)
+    giventask = [n_rows, n_cols]
     NS=nrun
 
     gt = GPTune(problem, computer=computer, data=data, options=options, historydb=historydb, driverabspath=os.path.abspath(__file__))
+    if npilot == 0:
+        gt.EvaluateObjective(T=[n_rows, n_cols], P=[["QR-LSQR", "sjlt", 5.0, 50, 0]])
+    elif npilot == 10:
+        with open("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+dataset+"-n_samples_"+str(npilot)+"-batch_num_"+str(batch_num)+".json") as f_in:
+            samples = json.load(f_in)
+            print (samples)
+            P = []
+            for sample in samples:
+                print (sample)
+                P_ = [sample["rls_method"], sample["sketch_operator"], sample["sampling_factor"], sample["vec_nnz"], sample["safety_exponent"]]
+                P.append(P_)
+        gt.EvaluateObjective(T=[n_rows, n_cols], P=P)
+    else:
+        gt.EvaluateObjective(T=[n_rows, n_cols], P=[["QR-LSQR", "sjlt", 5.0, 50, 0]])
 
-    def LoadSourceFunctionEvaluations():
-        with open("lhsmdu.db/LHSMDU-SEARCH-failure_handling_"+str(source_failure_handling)+"-n_rows_"+str(source_n_rows)+"-n_cols_"+str(source_n_cols)+"-mattype_"+str(source_mattype)+"-batch_num_1.json") as f_in:
-            function_evaluations = json.load(f_in)["func_eval"]
-            print ("loaded function evaluations: ", function_evaluations)
-
-            best_obj = None
-            best_func_eval = None
-            reference_normalized_residual_error_to_Axstar_ = None
-
-            for i in range(len(function_evaluations)):
-                func_eval = function_evaluations[i]
-                wall_clock_time = np.average(func_eval["additional_output"]["parla_times"])
-                normalized_residual_error_to_Axstar = np.average(func_eval["additional_output"]["normalized_residual_errors_to_Axstar"])
-                if i == 0:
-                    reference_normalized_residual_error_to_Axstar_ = normalized_residual_error_to_Axstar
-
-                if i == 0:
-                    best_obj = wall_clock_time
-                    best_func_eval = func_eval
-                else:
-                    if failure_handling == "highval":
-                        if np.average(normalized_residual_error_to_Axstar) > 10*(reference_normalized_residual_error_to_Axstar_):
-                            pass
-                        else:
-                            if wall_clock_time < best_obj:
-                                best_obj = wall_clock_time
-                                best_func_eval = func_eval
-                    elif failure_handling == "none":
-                        if wall_clock_time < best_obj:
-                            best_obj = wall_clock_time
-                            best_func_eval = func_eval
-
-            return [function_evaluations], best_func_eval
-
-    source_function_evaluations, best_func_eval = LoadSourceFunctionEvaluations()
-    P = [["QR-LSQR", "sjlt", 5.0, 50, 0], [best_func_eval["tuning_parameter"]["rls_method"], best_func_eval["tuning_parameter"]["sketch_operator"], best_func_eval["tuning_parameter"]["sampling_factor"], best_func_eval["tuning_parameter"]["vec_nnz"], best_func_eval["tuning_parameter"]["safety_exponent"]]]
-    gt.EvaluateObjective(T=[n_rows, n_cols], P=P)
-    (data, modeler, stats) = gt.TLA_I(NS=NS, Tnew=giventask, source_function_evaluations=source_function_evaluations)
+    (data, modeler, stats) = gt.SLA(NS=NS, NS1=npilot, Tgiven=giventask)
     print("stats: ", stats)
 
     """ Print all input and parameter samples """
-    for tid in range(NI):
-        print("tid: %d" % (tid))
-        print("    t: ", (data.I[tid][0]))
-        print("    Ps ", data.P[tid])
-        print("    Os ", data.O[tid].tolist())
-        print('    Popt ', data.P[tid][np.argmin(data.O[tid])], 'Oopt ', min(data.O[tid])[0], 'nth ', np.argmin(data.O[tid]))
+    print("    T: ", (data.I))
+    print("    Ps ", data.P)
+    print("    Os ", data.O.tolist())
+    print('    Popt ', data.P[np.argmin(data.O)], 'Oopt ', min(data.O)[0], 'nth ', np.argmin(data.O))
 
 if __name__ == "__main__":
 

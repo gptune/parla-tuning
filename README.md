@@ -42,7 +42,7 @@ install PARLA based on its README file
 *(2) Setup GPTune*
 ```
 $ git clone https://github.com/gptune/GPTune
-$ git checkout 6286557bdfdf98bbe5e5d2fb0977ab578ac28378
+$ git checkout de092cc8294df25eaf0817d2ed5c39d751c82759
 install GPTune based on its guideline (README and UserGuide).
 ```
 

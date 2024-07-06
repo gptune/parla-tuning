@@ -17,7 +17,7 @@ def query_best_result(n_rows, n_cols, failure_handling, mattype):
     with open("grid_search/grid_search.db/"+dbfile, "r") as f_in:
         function_evaluations = json.load(f_in)
         for func_eval in function_evaluations:
-            if func_eval["tuning_parameter"]["rls_method"] == "blendenpik" and \
+            if func_eval["tuning_parameter"]["rls_method"] == "QR-LSQR" and \
                func_eval["tuning_parameter"]["sketch_operator"] == "sjlt" and \
                func_eval["tuning_parameter"]["sampling_factor"] == 5.0 and \
                func_eval["tuning_parameter"]["vec_nnz"] == 50:
@@ -49,17 +49,17 @@ def query_best_result(n_rows, n_cols, failure_handling, mattype):
 
             total_evaluation_time += np.sum(func_eval["evaluation_detail"]["wall_clock_time"]["evaluations"])
 
-            if rls_method == "blendenpik" and sketch_operator == "sjlt":
+            if rls_method == "QR-LSQR" and sketch_operator == "sjlt":
                 category = 0
-            elif rls_method == "lsrn" and sketch_operator == "sjlt":
+            elif rls_method == "SVD-LSQR" and sketch_operator == "sjlt":
                 category = 1
-            elif rls_method == "newtonsketch" and sketch_operator == "sjlt":
+            elif rls_method == "SVD-PGD" and sketch_operator == "sjlt":
                 category = 2
-            elif rls_method == "blendenpik" and sketch_operator == "less_uniform":
+            elif rls_method == "QR-LSQR" and sketch_operator == "less_uniform":
                 category = 3
-            elif rls_method == "lsrn" and sketch_operator == "less_uniform":
+            elif rls_method == "SVD-LSQR" and sketch_operator == "less_uniform":
                 category = 4
-            elif rls_method == "newtonsketch" and sketch_operator == "less_uniform":
+            elif rls_method == "SVD-PGD" and sketch_operator == "less_uniform":
                 category = 5
 
             sampling_factor_map = {1:0, 2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:8, 10:9}
@@ -80,14 +80,14 @@ def gen_plots(n_rows, n_cols, failure_handling):
     f_out2 = open("plots/analysis_tuning_TLA_options_accumulated_times.txt", "w")
 
     plt.rcParams["font.family"] = "Times New Roman"
-    fig = plt.figure(figsize=(12,6))
+    fig = plt.figure(figsize=(13.5,6))
     outer = gridspec.GridSpec(2, 1, wspace=0.1, hspace=0.8)
 
     for base in ["num_evals", "eval_time"]:
         if base == "num_evals":
             objective = "mean"
             inner = gridspec.GridSpecFromSubplotSpec(1, 4,
-                            subplot_spec=outer[0], wspace=0.15, hspace=0.1)
+                            subplot_spec=outer[0], wspace=0.25, hspace=0.1)
         
             for problem_id in range(4):
                 ax = plt.Subplot(fig, inner[problem_id])
@@ -102,7 +102,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     mattype = "T1"
 
                 best_result_by_grid_search, num_total_grid_evaluations, num_total_grid_evaluation_time = query_best_result(n_rows, n_cols, failure_handling, mattype)
-                ax.axhline(best_result_by_grid_search, color="black", linestyle="-", label="Peak perf.")
+                ax.axhline(best_result_by_grid_search, color="black", linestyle="-", label="Best from Figure 4")
         
                 #for tuner in ["lhsmdu","tpe","gptune","gptune-tla","gptune-tla1","gptune-tla2","gptune-tla3","gptune-tla4"]: #,"gptune-tla5"]:
                 #for tuner in ["lhsmdu","tpe","gptune","gptune-tla","gptune-tla3"]:
@@ -146,9 +146,9 @@ def gen_plots(n_rows, n_cols, failure_handling):
         
                             #if tuner == "gptune" or tuner == "random":
                             if "gptune" in tuner or "lhsmdu" in tuner:
-                                function_evaluations = json.load(f_in)["func_eval"]
+                                function_evaluations = json.load(f_in)["func_eval"][0:50]
                             elif "random" in tuner or "tpe" in tuner:
-                                function_evaluations = json.load(f_in)
+                                function_evaluations = json.load(f_in)[0:50]
         
                             reference_normalized_residual_error_to_Axstar = 0
                             for i in range(0, len(function_evaluations), 1):
@@ -246,9 +246,10 @@ def gen_plots(n_rows, n_cols, failure_handling):
 
                     ax.set_xlim(1, 50)
                     ax.set_xticks([1,10,20,30,40,50])
-                    ax.set_xticklabels(["3","10","20","30","40","50"])
+                    #ax.set_xticklabels(["3","10","20","30","40","50"])
 
-                    ax.set_ylim(0.5, 2.0)
+                    ax.set_ylim(0.5, 5.0)
+                    ax.set_yscale("log")
                     #if mattype == "T1":
                     #    ax.set_ylim(0.8, 2.0)
                     #    ax.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
@@ -267,7 +268,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
 
                     ax.set_xlim(1, 50)
                     ax.set_xticks([1,10,20,30,40,50])
-                    ax.set_xticklabels(["3","10","20","30","40","50"])
+                    #ax.set_xticklabels(["3","10","20","30","40","50"])
         
                     ax.set_xlabel("Number of function evaluations", fontsize=12)
                     if problem_id == 0:
@@ -280,7 +281,7 @@ def gen_plots(n_rows, n_cols, failure_handling):
         elif base == "eval_time":
             objective = "mean"
             inner = gridspec.GridSpecFromSubplotSpec(1, 4,
-                            subplot_spec=outer[1], wspace=0.15, hspace=0.1)
+                            subplot_spec=outer[1], wspace=0.25, hspace=0.1)
     
             for problem_id in range(4):
                 ax = plt.Subplot(fig, inner[problem_id])
@@ -341,9 +342,9 @@ def gen_plots(n_rows, n_cols, failure_handling):
                             accumulated_evaluation_time_s = 0
     
                             if "gptune" in tuner or "lhsmdu" in tuner:
-                                function_evaluations = json.load(f_in)["func_eval"]
+                                function_evaluations = json.load(f_in)["func_eval"][0:50]
                             elif "random" in tuner or "tpe" in tuner:
-                                function_evaluations = json.load(f_in)
+                                function_evaluations = json.load(f_in)[0:50]
     
                             prior_result = -1
     
@@ -423,13 +424,13 @@ def gen_plots(n_rows, n_cols, failure_handling):
                             print ("i : ", i , " length: ", len(batches_best_tuning_result[i]))
                             completion_times.append(len(batches_best_tuning_result[i]))
 
-                        #min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
                         average_completion_time = int(np.round(np.average(completion_times))) #len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
                         f_out2.write(str(mattype)+","+str(label_name))
                         f_out2.write(","+str(average_completion_time)+","+str(completion_times)+"\n")
                         print ("average_completion_time: ", average_completion_time)
 
-                        min_bound = min(400, min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result))))
+                        #min_bound = min(400, min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result))))
                         #min_bound = 200
     
                         start_point = 0
@@ -458,8 +459,8 @@ def gen_plots(n_rows, n_cols, failure_handling):
                         ax.fill_between(num_func_eval, best_tuning_result-np.std(batches_best_tuning_result_, axis=0), best_tuning_result+np.std(batches_best_tuning_result_, axis=0), color=color_code, alpha=0.2)
     
                     elif objective == "std":
-                        #min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
-                        min_bound = min(400, min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result))))
+                        min_bound = min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result)))
+                        #min_bound = min(400, min(len(batches_best_tuning_result[i]) for i in range(len(batches_best_tuning_result))))
                         #min_bound = 200
                         start_point = 0
                         for i in range(min_bound):
@@ -481,30 +482,31 @@ def gen_plots(n_rows, n_cols, failure_handling):
                     #if problem_id == 0:
                     #    ax.legend(loc='upper right', ncol=1)
 
-                    if mattype == "GA" or mattype =="T5":
-                        ax.set_xlim(0, 400) #1000)
-                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
-                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
-                        #ax.set_xlim(0, 600)
-                        #ax.set_xticks([0,200,400,600,800])
-                        #ax.set_xticklabels(["0","200","400","600","800"])
-                    elif mattype == "T3":
-                        ax.set_xlim(0, 400) #1000)
-                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
-                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
-                        #ax.set_xlim(0, 800)
-                        #ax.set_xticks([0,200,400,600,800])
-                        #ax.set_xticklabels(["0","200","400","600","800"])
-                    elif mattype == "T1":
-                        ax.set_xlim(0, 400) #1000)
-                        ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
-                        ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
-                        #ax.set_xlim(0, 1500)
-                        #ax.set_xticks([0,500,1000,1500])
-                        #ax.set_xticklabels(["0","500","1000","1500"])
-                    #ax.set_xlim(0, 450)
+                    #if mattype == "GA" or mattype =="T5":
+                    #    ax.set_xlim(0, 400) #1000)
+                    #    ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                    #    ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                    #    #ax.set_xlim(0, 600)
+                    #    #ax.set_xticks([0,200,400,600,800])
+                    #    #ax.set_xticklabels(["0","200","400","600","800"])
+                    #elif mattype == "T3":
+                    #    ax.set_xlim(0, 400) #1000)
+                    #    ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                    #    ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                    #    #ax.set_xlim(0, 800)
+                    #    #ax.set_xticks([0,200,400,600,800])
+                    #    #ax.set_xticklabels(["0","200","400","600","800"])
+                    #elif mattype == "T1":
+                    #    ax.set_xlim(0, 400) #1000)
+                    #    ax.set_xticks([0,100,200,300,400]) #,600,800,1000])
+                    #    ax.set_xticklabels(["0","100","200","300","400"]) #,"600","800","1000"])
+                    #    #ax.set_xlim(0, 1500)
+                    #    #ax.set_xticks([0,500,1000,1500])
+                    #    #ax.set_xticklabels(["0","500","1000","1500"])
+                    ##ax.set_xlim(0, 450)
 
-                    ax.set_ylim(0.5, 2.0)
+                    ax.set_ylim(0.5, 5.0)
+                    ax.set_yscale("log")
                     #if mattype == "T1":
                     #    ax.set_ylim(0.8, 2.0)
                     #    ax.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
@@ -552,11 +554,11 @@ def gen_plots(n_rows, n_cols, failure_handling):
             color = "black")
 
     fig.text(0.20, 0.03,
-            "(b) Tuned performance depending on the accumulated function evaluation time (until 400s)",
+            "(b) Tuned performance depending on the accumulated function evaluation time",
             fontsize = 16,
             color = "black")
 
-    fig.subplots_adjust(top=0.88, bottom=0.15, left=0.06, right=0.98, wspace=0.02, hspace=0.02)
+    fig.subplots_adjust(top=0.88, bottom=0.15, left=0.08, right=0.98, wspace=0.02, hspace=0.02)
     fig.savefig("plots/"+experiment_name+".pdf")
     f_out2.close()
 

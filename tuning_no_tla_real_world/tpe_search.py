@@ -30,7 +30,7 @@ def parse_args():
 
     parser.add_argument('-nrun', type=int, default=50, help='Number of runs per task')
     parser.add_argument('-npilot', type=int, default=0, help='Number of initial samples per task')
-    parser.add_argument('-mattype', type=str, default="GA")
+    parser.add_argument('-dataset', type=str, default="musk")
     parser.add_argument('-nthreads', type=int, default=8)
     parser.add_argument('-n_rows', type=int, default=1, help="n_rows")
     parser.add_argument('-n_cols', type=int, default=1, help="n_cols")
@@ -47,7 +47,7 @@ def objective(params):
 
     global n_rows
     global n_cols
-    global mattype
+    global dataset
     global nthreads
     global x_star
     global direct_time
@@ -88,7 +88,7 @@ def objective(params):
     print ("sampling_factor: ", sampling_factor)
     print ("vec_nnz: ", vec_nnz)
 
-    tpe_search_logfile = "tpe.db/TPE-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-mattype_"+str(mattype)+"-npilot_"+str(npilot)+"-batch_num_"+str(batch_num)+".json"
+    tpe_search_logfile = "tpe.db/TPE-SEARCH-failure_handling_"+str(failure_handling)+"-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+str(dataset)+"-npilot_"+str(npilot)+"-batch_num_"+str(batch_num)+".json"
     json_data_arr = []
 
     if not os.path.exists(tpe_search_logfile):
@@ -207,7 +207,7 @@ def objective(params):
         },
         "constants": {
             "niter": niter,
-            "dataset": "synthetic",
+            "dataset": dataset,
             "nthreads": nthreads
         },
         "tuning_parameter": {
@@ -275,7 +275,7 @@ def run_tpe_search():
 
     global n_rows
     global n_cols
-    global mattype
+    global dataset
     global nthreads
     global x_star
     global direct_time
@@ -293,8 +293,8 @@ def run_tpe_search():
     print ("n_rows: ", n_rows)
     n_cols = args.n_cols
     print ("n_cols: ", n_cols)
-    mattype = str(args.mattype)
-    print ("mattype: ", mattype)
+    dataset = str(args.dataset)
+    print ("dataset: ", dataset)
     nthreads = args.nthreads
     print ("nthreads: ", nthreads)
     nrun = args.nrun
@@ -308,10 +308,10 @@ def run_tpe_search():
 
     niter = 5
 
-    A = np.genfromtxt("../input/synthetic_mvt/data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    A = np.genfromtxt("../input/"+dataset+"/"+dataset+"-data-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     A = np.delete(A, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
 
-    b = np.genfromtxt("../input/synthetic_mvt/result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+"-mattype_"+str(mattype)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
+    b = np.genfromtxt("../input/"+dataset+"/"+dataset+"-result-nrows_"+str(n_rows)+"-ncols_"+str(n_cols)+".csv", delimiter=',', skip_header=1, dtype=np.float64)
     b = np.delete(b, 0, 1) # the first row of the synthetic input data is meta information, so we remove that here.
     b = b.ravel()
 
@@ -355,7 +355,7 @@ def run_tpe_search():
     if npilot == 0:
         trials = generate_trials_to_calculate([{'rls_method':1, 'sketch_operator':1, 'sampling_factor':5.0, 'vec_nnz':50, 'safety_exponent':0 }])
     elif npilot == 10:
-        with open("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-n_samples_"+str(npilot)+"-batch_num_"+str(batch_num)+".json") as f_in:
+        with open("lhsmdu.sample/LHSMDU-SAMPLE-n_rows_"+str(n_rows)+"-n_cols_"+str(n_cols)+"-dataset_"+dataset+"-n_samples_"+str(npilot)+"-batch_num_"+str(batch_num)+".json") as f_in:
             samples = json.load(f_in)
             P = []
             for sample in samples:
